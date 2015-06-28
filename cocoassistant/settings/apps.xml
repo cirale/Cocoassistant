@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfApps xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <apps>
+    <key>chrome</key>
+    <path>C:\Program Files (x86)\Google\Chrome\Application\chrome.exe</path>
+  </apps>
+  <apps>
+    <key>krile</key>
+    <path>D:\program files\krile\Krile.exe</path>
+  </apps>
+  <apps>
+    <key>foobar2000</key>
+    <path>D:\program files\foobar2000\foobar2000.exe</path>
+  </apps>
+</ArrayOfApps>
