@@ -70,6 +70,7 @@ namespace cocoassistant{
 
         public static String getWeather(String txt) {
             Match m = Regex.Match(txt, @"^(?<day>.*)の天気");
+            if (!m.Groups["day"].Value.Equals(@"今日") && !m.Groups["day"].Value.Equals(@"明日")) return "今日と明日の天気しかわからないよ～";
             String url = "http://weather.livedoor.com/forecast/webservice/json/v1?city=220040";
             WebClient wc = new WebClient();
             byte[] data = wc.DownloadData(url);
