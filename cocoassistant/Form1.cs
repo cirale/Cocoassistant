@@ -140,15 +140,25 @@ namespace cocoassistant{
                 }
                 if (Regex.IsMatch(str, @"([0-9]+)時")) {
                     h = int.Parse(Regex.Match(str, @"(?<h>[0-9]+)時").Groups["h"].Value);
+                    if (m == -1) m = 0;
                 }
                 if (Regex.IsMatch(str, @"([0-9]+)日")) {
                     d = int.Parse(Regex.Match(str, @"(?<d>[0-9]+)日").Groups["d"].Value);
+                    if (m == -1) m = 0;
+                    if (h == -1) h = 0;
                 }
                 if (Regex.IsMatch(str, @"([0-9]+)月")) {
                     n = int.Parse(Regex.Match(str, @"(?<n>[0-9]+)月").Groups["n"].Value);
+                    if (m == -1) m = 0;
+                    if (h == -1) h = 0;
+                    if (d == -1) d = 0;
                 }
                 if (Regex.IsMatch(str, @"([0-9]+)年")) {
                     y = int.Parse(Regex.Match(str, @"(?<y>[0-9]+)年").Groups["y"].Value);
+                    if (m == -1) m = 0;
+                    if (h == -1) h = 0;
+                    if (d == -1) d = 0;
+                    if (n == -1) n = 0;
                 }
                 tdt = DateTime.Now;
                 dt = new DateTime((y>=0) ? y : tdt.Year, (n>=0) ? n : tdt.Month, (d>=0) ? d : tdt.Day, (h>=0) ? h : tdt.Hour, (m>=0) ? m : tdt.Minute, 0);
