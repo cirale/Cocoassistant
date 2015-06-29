@@ -21,6 +21,8 @@ namespace cocoassistant{
 
         private void Form1_Load(object sender, System.EventArgs e){
 
+            this.ShowInTaskbar = false;
+
             pictureBox1.Image = new Bitmap(Directory.GetCurrentDirectory() + "\\" + "img\\chara.png");
             pictureBox2.Image = new Bitmap(Directory.GetCurrentDirectory() + "\\" + "img\\hukidashi.png");
 
@@ -35,13 +37,14 @@ namespace cocoassistant{
             this.TransparencyKey = Color.DarkGray;
 
             //常に最前面に表示
-            this.TopMost = true;
+            this.TopMost = Properties.Settings.Default.MostTop;
+            toolStripMenuItem1.Checked = Properties.Settings.Default.MostTop;
 
            //位置復元
             this.Left = Properties.Settings.Default.Left;
             this.Top = Properties.Settings.Default.Top;
 
-            richTextBox1.Text = "ご注文はなぁに？";
+            richTextBox1.Text = "ご注文は何ですか？";
             this.pictureBox1.Focus();
 
         }
@@ -73,10 +76,12 @@ namespace cocoassistant{
 
             if (richTextBox1.Text == "ばいばい") formClose();
 
-            else if (Regex.IsMatch(richTextBox1.Text, @"^(.*)を起動")){
+            else if (richTextBox1.Text == "ありがとう") richTextBox1.Text = "どういたしまして!";
+
+            else if (Regex.IsMatch(richTextBox1.Text, @"^(.*)を(起動|開いて)")){
                 String str = richTextBox1.Text;
                 richTextBox1.Text = "まかせて!";
-                if(!Action.launchApp(str)) richTextBox1.Text = "名前が違うみたい";
+                if(!Action.launchApp(str)) richTextBox1.Text = "開けなかったよ～";
 
             }else if (Regex.IsMatch(richTextBox1.Text, @"^(.*)で検索")){
                 String str = richTextBox1.Text;
@@ -86,8 +91,15 @@ namespace cocoassistant{
             } else if(Regex.IsMatch(richTextBox1.Text, @"^(.*)の天気")){
                 String str = richTextBox1.Text;
                 richTextBox1.Text = Action.getWeather(str);
+            } else if(Regex.IsMatch(richTextBox1.Text, @"^(.*)は何日")){
+                String str = richTextBox1.Text;
+                richTextBox1.Text = Action.replyDate(str);
 
-            } else {
+            } else if (Regex.IsMatch(richTextBox1.Text, @"^(.*)は何曜日")) {
+                String str = richTextBox1.Text;
+                richTextBox1.Text = Action.replyWeekDay(str);
+
+            }else {
                 String str = richTextBox1.Text;
                 richTextBox1.Text = "まかせて!";
                 Action.launchAppByKeyOnly(str);
@@ -105,6 +117,7 @@ namespace cocoassistant{
         private void formClose(){
             Properties.Settings.Default.Left = this.Left;
             Properties.Settings.Default.Top = this.Top;
+            Properties.Settings.Default.MostTop = this.TopMost;
             Properties.Settings.Default.Save();
             richTextBox1.Text = "またね!";
             richTextBox1.Update();
@@ -112,5 +125,22 @@ namespace cocoassistant{
             this.Close();
         }
 
+        private void toolStripMenuItem1_Changed(object sender, EventArgs e) {
+            if (toolStripMenuItem1.Checked) this.TopMost = true;
+            else this.TopMost = false;
+        }
+
+        private void toolStripMenuItem1_Click(object sender, EventArgs e) {
+            toolStripMenuItem1.Checked = !toolStripMenuItem1.Checked;
+        }
+
+
+        private void notifyIcon1_Click(object sender, EventArgs e) {
+            if (!this.TopMost) {
+                this.TopMost = true;
+                this.TopMost = false;
+            }
+
+        }
     }
 }

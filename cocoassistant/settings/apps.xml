@@ -12,4 +12,8 @@
     <key>foobar2000</key>
     <path>D:\program files\foobar2000\foobar2000.exe</path>
   </apps>
+  <apps>
+    <key>DropBox</key>
+    <path>D:\cirale\Dropbox</path>
+  </apps>
 </ArrayOfApps>

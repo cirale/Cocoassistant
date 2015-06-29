@@ -46,5 +46,17 @@ namespace cocoassistant.Properties {
                 this["Top"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool MostTop {
+            get {
+                return ((bool)(this["MostTop"]));
+            }
+            set {
+                this["MostTop"] = value;
+            }
+        }
     }
 }
