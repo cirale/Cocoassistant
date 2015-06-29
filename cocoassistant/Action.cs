@@ -12,7 +12,9 @@ using Codeplex.Data;
 using System.Timers;
 
 namespace cocoassistant{
-    class Action{
+    public class Action{
+
+        private static String time;
 
         //指定したアプリケーションを起動
         public static bool launchApp(String txt){
@@ -102,8 +104,8 @@ namespace cocoassistant{
                     break;
                 }
             }
-            if (m.Groups["day"].Value.Equals(@"明後日") && date == null) return "まだ明後日の天気はわからないよ～"; 
-            return m.Groups["day"].Value + "(" + date + ")の天気は" + tenki + "、最高気温は" + high + "℃、最低気温は" + low + "℃だよ！";
+            if (m.Groups["day"].Value.Equals(@"明後日") && date == "") return "まだ明後日の天気はわからないよ～"; 
+            return m.Groups["day"].Value + "(" + date + ")の天気は" + tenki + ((high!="-") ? "、最高気温は" + high + "℃" : "") + ((low!="-") ? "、最低気温は" + low + "℃" : "") + "だよ！";
         }
 
         public static String replyDate(String txt) {
