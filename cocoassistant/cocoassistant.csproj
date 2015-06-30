@@ -51,7 +51,7 @@
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>cocoa2.ico</ApplicationIcon>
+    <ApplicationIcon>img\cocoa.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DynamicJson">
@@ -122,14 +122,14 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="cocoa2.ico" />
     <Content Include="img\chara.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="img\cocoa.ico" />
-    <Content Include="img\cocoa2.ico" />
+    <Content Include="img\cocoa.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="img\hukidashi.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="settings\apps.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

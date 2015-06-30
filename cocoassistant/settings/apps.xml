@@ -7,13 +7,21 @@
   <apps>
     <key>krile</key>
     <path>D:\program files\krile\Krile.exe</path>
+    <cmdop />
   </apps>
   <apps>
     <key>foobar2000</key>
     <path>D:\program files\foobar2000\foobar2000.exe</path>
+    <cmdop />
   </apps>
   <apps>
     <key>DropBox</key>
     <path>D:\cirale\Dropbox</path>
+    <cmdop />
+  </apps>
+  <apps>
+    <key>cygwin</key>
+    <path>D:\cygwin64\bin\mintty.exe</path>
+    <cmdop>-i /Cygwin-Terminal.ico -</cmdop>
   </apps>
 </ArrayOfApps>

@@ -17,6 +17,7 @@ namespace cocoassistant{
         private Point mousePoint;
         private String time;
         private String stime;
+        private int ad = -100;
         private System.Timers.Timer timer;
         private int sInterval;
        
@@ -53,7 +54,6 @@ namespace cocoassistant{
             this.pictureBox1.Focus();
 
         }
-
         //Form1のMouseDownイベントハンドラ
         private void Form1_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e){
             if ((e.Button & MouseButtons.Left) == MouseButtons.Left){
@@ -75,7 +75,7 @@ namespace cocoassistant{
             richTextBox1.ForeColor = Color.Black;
         }
 
-        private void button1_Click(object sender, EventArgs e){
+        private void submit(){
 
             richTextBox1.Text = richTextBox1.Text.Trim();
 
@@ -88,23 +88,28 @@ namespace cocoassistant{
                 String str = richTextBox1.Text;
                 richTextBox1.Text = "まかせて!";
                 if(!Action.launchApp(str)) richTextBox1.Text = "開けなかったよ～";
+
                 //ググる
             }else if (Regex.IsMatch(richTextBox1.Text, @"^(.*)で検索")){
                 String str = richTextBox1.Text;
                 richTextBox1.Text = "まかせて!";
                 Action.searchWord(str);
+
                 //天気を取得
             } else if(Regex.IsMatch(richTextBox1.Text, @"^(.*)の天気")){
                 String str = richTextBox1.Text;
                 richTextBox1.Text = Action.getWeather(str);
+
                 //日付を取得
             } else if(Regex.IsMatch(richTextBox1.Text, @"^(.*)は何日")){
                 String str = richTextBox1.Text;
                 richTextBox1.Text = Action.replyDate(str);
+
                 //曜日を取得
             } else if (Regex.IsMatch(richTextBox1.Text, @"^(.*)は何曜日")) {
                 String str = richTextBox1.Text;
                 richTextBox1.Text = Action.replyWeekDay(str);
+
                 //タイマー Actionに含められない…
             } else if (Regex.IsMatch(richTextBox1.Text, @"^(.*)(時間|分|秒)(経ったら教えて|計って)")) {
                 String str = richTextBox1.Text;
@@ -185,12 +190,20 @@ namespace cocoassistant{
                 timer.AutoReset = false;
                 timer.Start();
 
+                //アプリショートカットを追加
+            } else if (Regex.IsMatch(richTextBox1.Text, @"(.*?):(.*)を追加して")) {
+                richTextBox1.Text = Action.addApp(richTextBox1.Text);
+
+            } else if (Regex.IsMatch(richTextBox1.Text, @"(.*?)を削除して")) {
+                richTextBox1.Text = Action.deleteApp(richTextBox1.Text);
+
                 //その他 アプリ名をもとにソフト起動したりフォルダ・ファイル開いたりググったり
-            }else {
+            } else {
                 String str = richTextBox1.Text;
                 richTextBox1.Text = "まかせて!";
                 Action.launchAppByKeyOnly(str);
             }
+            this.pictureBox1.Focus();
         }
 
         private void endTimer(object sender, ElapsedEventArgs e) {
@@ -239,8 +252,15 @@ namespace cocoassistant{
                 this.TopMost = true;
                 this.TopMost = false;
             }
-
         }
+
+        private void richTextBox1_KeyDown(object sender, KeyEventArgs e) {
+            if (((e.Modifiers & Keys.Control) == Keys.Control) && e.KeyCode == Keys.Enter) {
+                e.Handled = true;
+                submit();
+            }
+        }
+        
 
     }
 }

@@ -14,34 +14,32 @@ using System.Timers;
 namespace cocoassistant{
     public class Action{
 
-        private static String time;
 
         //指定したアプリケーションを起動
         public static bool launchApp(String txt){
-            apps[] ap = new apps[256];
-            /*ap[0] = new apps();
-            ap[0].key = "chrome";
-            ap[0].path = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
-            ap[1] = new apps();
-            ap[1].key = "krile";
-            ap[1].path = @"D:\program files\krile\Krile.exe";
-
-
-            XmlSerializer serializer = new XmlSerializer(typeof(apps[]));
-
-            StreamWriter sw = new StreamWriter(Directory.GetCurrentDirectory() + "\\" + @"settings\apps.xml",false,new UTF8Encoding(false));
-            serializer.Serialize(sw, ap);
-            sw.Close();*/
-
+            List<apps> ap = new List<apps>();
             Match m = Regex.Match(txt, @"^(?<path>.*)を(起動|開いて)");
-
-            XmlSerializer serializer = new XmlSerializer(typeof(apps[]));
+            String key,opt = "";
+            XmlSerializer serializer = new XmlSerializer(typeof(List<apps>));
             StreamReader fs = new StreamReader(Directory.GetCurrentDirectory() + "\\" + @"settings\apps.xml",new UTF8Encoding(false));
-            ap = (apps[])serializer.Deserialize(fs);
+            ap = (List<apps>)serializer.Deserialize(fs);
             fs.Close();
-            for (int i = 0; i < ap.Length; i++) {
-                if (ap[i].key.Equals(m.Groups["path"].Value, StringComparison.OrdinalIgnoreCase)) {
-                    System.Diagnostics.Process.Start(ap[i].path);
+
+            if (Regex.IsMatch(m.Groups["path"].Value, @"^(?<key>.*?):(?<cmdop>.*)$")) {
+                Match op = Regex.Match(m.Groups["path"].Value, @"^(?<key>.*?):(?<cmdop>.*)$");
+                key = op.Groups["key"].Value;
+                opt = op.Groups["cmdop"].Value;
+            } else {
+                key = m.Groups["path"].Value;
+            }
+
+            for (int i = 0; i < ap.Count; i++) {
+                if (ap[i].key.Equals(key, StringComparison.CurrentCultureIgnoreCase) && (File.Exists(ap[i].path) || Directory.Exists(ap[i].path))) {
+                    Console.WriteLine(opt);
+                    System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo();
+                    psi.FileName = ap[i].path;
+                    psi.Arguments = opt;
+                    System.Diagnostics.Process.Start(psi);
                     return true;
                 }
             }
@@ -54,15 +52,27 @@ namespace cocoassistant{
 
         //アプリ名のみ入力されたとき 設定にあれば起動する パスが入力されていればそれを開く どちらでもなければgoogleで検索する。
         public static void launchAppByKeyOnly(String txt) {
-            apps[] ap = new apps[256];
-
-            XmlSerializer serializer = new XmlSerializer(typeof(apps[]));
+            List<apps> ap = new List<apps>();
+            String key, opt = "";
+            XmlSerializer serializer = new XmlSerializer(typeof(List<apps>));
             StreamReader fs = new StreamReader(Directory.GetCurrentDirectory() + "\\" + @"settings\apps.xml", new UTF8Encoding(false));
-            ap = (apps[])serializer.Deserialize(fs);
+            ap = (List<apps>)serializer.Deserialize(fs);
             fs.Close();
-            for (int i = 0; i < ap.Length; i++) {
-                if (ap[i].key.Equals(txt, StringComparison.OrdinalIgnoreCase)) {
-                    System.Diagnostics.Process.Start(ap[i].path);
+
+            if (Regex.IsMatch(txt, @"^(?<key>.*?):(?<cmdop>.*)$")) {
+                Match op = Regex.Match(txt, @"^(?<key>.*?):(?<cmdop>.*)$");
+                key = op.Groups["key"].Value;
+                opt = op.Groups["cmdop"].Value;
+            } else {
+                key = txt;
+            }
+
+            for (int i = 0; i < ap.Count; i++) {
+                if (ap[i].key.Equals(key, StringComparison.OrdinalIgnoreCase) && (File.Exists(ap[i].path) || Directory.Exists(ap[i].path))) {
+                    System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo();
+                    psi.FileName = ap[i].path;
+                    psi.Arguments = opt;
+                    System.Diagnostics.Process.Start(psi);
                     return;
                 }
             }
@@ -72,6 +82,53 @@ namespace cocoassistant{
             } 
             System.Diagnostics.Process.Start(@"https://www.google.co.jp/search?q=" + Uri.EscapeDataString(txt));
             return;
+        }
+
+        public static String addApp(String txt) {
+            Match m = Regex.Match(txt, @"(?<key>.*?):(?<path>.*)を追加して");
+            Match op;
+
+            op = Regex.Match(m.Groups["path"].Value, @"(?<path>[a-zA-Z]:.*?):(?<cmdop>.*)$");
+            if (!File.Exists(m.Groups["path"].Value) && !File.Exists(op.Groups["path"].Value) && !Directory.Exists(op.Groups["path"].Value)) {
+                return "パスが間違ってるよ～";
+            } 
+
+            List<apps> ap = new List<apps>();
+
+            XmlSerializer serializer = new XmlSerializer(typeof(List<apps>));
+            StreamReader fs = new StreamReader(Directory.GetCurrentDirectory() + "\\" + @"settings\apps.xml", new UTF8Encoding(false));
+            ap = (List<apps>)serializer.Deserialize(fs);
+            fs.Close();
+
+            for (int i = 0; i < ap.Count; i++) {
+                if (ap[i].key.Equals(m.Groups["key"].Value)) return "キーが被ってるよ～";
+            }
+            ap.Add(new apps(m.Groups["key"].Value, op.Groups["path"].Value.Equals(String.Empty) ? m.Groups["path"].Value : op.Groups["path"].Value, op.Groups["cmdop"].Value.Equals(String.Empty) ? "" : op.Groups["cmdop"].Value));
+            StreamWriter sw = new StreamWriter(Directory.GetCurrentDirectory() + "\\" + @"settings\apps.xml",false, new UTF8Encoding(false));
+            serializer.Serialize(sw,ap);
+            sw.Close();
+            return "追加したよ！";
+        }
+
+        public static String deleteApp(String txt) {
+            Match m = Regex.Match(txt, @"(?<key>.*?)を削除して");
+            List<apps> ap = new List<apps>();
+
+            XmlSerializer serializer = new XmlSerializer(typeof(List<apps>));
+            StreamReader fs = new StreamReader(Directory.GetCurrentDirectory() + "\\" + @"settings\apps.xml", new UTF8Encoding(false));
+            ap = (List<apps>)serializer.Deserialize(fs);
+            fs.Close();
+
+            for (int i = 0; i < ap.Count; i++) {
+                if (ap[i].key.Equals(m.Groups["key"].Value)) {
+                    ap.RemoveAt(i);
+                    StreamWriter sw = new StreamWriter(Directory.GetCurrentDirectory() + "\\" + @"settings\apps.xml", false, new UTF8Encoding(false));
+                    serializer.Serialize(sw, ap);
+                    sw.Close();
+                    return "削除したよ！";
+                }
+            }
+            return "アプリ名が間違ってるよ～";
         }
 
         //googleで検索する
@@ -118,13 +175,23 @@ namespace cocoassistant{
             else if (m.Groups["date"].Value.Equals("一昨日")) dt = DateTime.Today.AddDays(-2);
             else if (Regex.IsMatch(m.Groups["date"].Value, @"[0-9]*日前")) {
                 m = Regex.Match(m.Groups["date"].Value, @"(?<num>[0-9]*)日前");
-                int t = int.Parse(m.Groups["num"].Value);
-                dt = DateTime.Today.AddDays(-t);
+                try {
+                    int t = int.Parse(m.Groups["num"].Value);
+                    dt = DateTime.Today.AddDays(-t);
+                } catch {
+                    return "わからないよ～";
+                }
             } else if (Regex.IsMatch(m.Groups["date"].Value, @"[0-9]*日後")) {
                 m = Regex.Match(m.Groups["date"].Value, @"(?<num>[0-9]*)日後");
-                int t = int.Parse(m.Groups["num"].Value);
-                dt = DateTime.Today.AddDays(t);
-            } else return "いつ？";
+                try {
+                    int t = int.Parse(m.Groups["num"].Value);
+                    dt = DateTime.Today.AddDays(t);
+                } catch {
+                    return "わからないよ～";
+                }
+
+            } else return "わからないよ～";
+
             return Regex.Match(txt, @"^(?<date>.*)は何日").Groups["date"].Value + "は" + dt.ToString("yyyy年MM月dd日、dddd") + "だよ!";
         }
 
@@ -149,8 +216,12 @@ namespace cocoassistant{
                 int y = int.Parse(m.Groups["y"].Value);
                 int n = int.Parse(m.Groups["m"].Value);
                 int d = int.Parse(m.Groups["d"].Value);
-                dt = new DateTime(y,n,d);
-            } else return "いつ？";
+                try {
+                    dt = new DateTime(y, n, d);
+                } catch {
+                    return "わからないよ～";
+                }
+            } else return "わからないよ～";
             return Regex.Match(txt, @"^(?<date>.*)は何曜日").Groups["date"].Value + "は" + dt.ToString("dddd") + "だよ!";
         }
     }
