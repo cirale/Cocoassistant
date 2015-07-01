@@ -84,15 +84,16 @@ namespace cocoassistant{
             return;
         }
 
-        public static String addApp(String txt) {
+        //アプリ追加
+        public static String addApp(String txt) 
+        {
             Match m = Regex.Match(txt, @"(?<key>.*?):(?<path>.*)を追加して");
             Match op;
 
             op = Regex.Match(m.Groups["path"].Value, @"(?<path>[a-zA-Z]:.*?):(?<cmdop>.*)$");
-            if (!File.Exists(m.Groups["path"].Value) && !File.Exists(op.Groups["path"].Value) && !Directory.Exists(op.Groups["path"].Value)) {
+            if (!File.Exists(m.Groups["path"].Value) && !Directory.Exists(m.Groups["path"].Value) && !File.Exists(op.Groups["path"].Value) && !Directory.Exists(op.Groups["path"].Value)) {
                 return "パスが間違ってるよ～";
-            } 
-
+            }
             List<apps> ap = new List<apps>();
 
             XmlSerializer serializer = new XmlSerializer(typeof(List<apps>));
@@ -110,6 +111,7 @@ namespace cocoassistant{
             return "追加したよ！";
         }
 
+        //アプリ削除
         public static String deleteApp(String txt) {
             Match m = Regex.Match(txt, @"(?<key>.*?)を削除して");
             List<apps> ap = new List<apps>();
@@ -129,6 +131,21 @@ namespace cocoassistant{
                 }
             }
             return "アプリ名が間違ってるよ～";
+        }
+
+        public static String getAppList() {
+            List<apps> ap = new List<apps>();
+
+            XmlSerializer serializer = new XmlSerializer(typeof(List<apps>));
+            StreamReader fs = new StreamReader(Directory.GetCurrentDirectory() + "\\" + @"settings\apps.xml", new UTF8Encoding(false));
+            ap = (List<apps>)serializer.Deserialize(fs);
+            fs.Close();
+
+            String res = "全部で" + ap.Count + "件だよ！\n";
+            for (int i = 0; i < ap.Count; i++) {
+                res += ap[i].key + ":" + ap[i].path + (ap[i].cmdop == null ? "\n" : ":" + ap[i].cmdop + "\n");
+            }
+            return res;
         }
 
         //googleで検索する
@@ -223,6 +240,18 @@ namespace cocoassistant{
                 }
             } else return "わからないよ～";
             return Regex.Match(txt, @"^(?<date>.*)は何曜日").Groups["date"].Value + "は" + dt.ToString("dddd") + "だよ!";
+        }
+
+        public static String processInfo() {
+            String res = "私のプロセス情報だよ！\n";
+            System.Diagnostics.Process p = System.Diagnostics.Process.GetCurrentProcess();
+            p.Refresh();
+            res += "プロセスID:" + p.Id + "\n";
+            res += "プロセス名:" + p.ProcessName + "\n";
+            res += "基本優先度:" + p.BasePriority + "\n";
+            res += "物理メモリ:" + p.WorkingSet64 + "\n";
+            res += "仮想メモリ:" + p.VirtualMemorySize64 + "\n";
+            return res;
         }
     }
 }

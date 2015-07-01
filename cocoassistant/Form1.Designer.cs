@@ -97,6 +97,7 @@
             this.richTextBox1.Text = "ご注文は何ですか？";
             this.richTextBox1.Enter += new System.EventHandler(this.richTextBox1_Enter);
             this.richTextBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.richTextBox1_KeyDown);
+            this.richTextBox1.Leave += new System.EventHandler(this.richTextBox1_Leave);
             // 
             // notifyIcon1
             // 

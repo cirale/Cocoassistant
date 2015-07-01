@@ -11,15 +11,21 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Timers;
+using HongliangSoft.Utilities.Gui;
+
 
 namespace cocoassistant{
     public partial class Form1 : Form{
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
         private Point mousePoint;
         private String time;
         private String stime;
-        private int ad = -100;
         private System.Timers.Timer timer;
         private int sInterval;
+        private static KeyboardHook keyHook;
        
         public Form1(){
             InitializeComponent();
@@ -27,6 +33,11 @@ namespace cocoassistant{
 
         private void Form1_Load(object sender, System.EventArgs e){
 
+            //キーボードをグローバルフックする
+            keyHook = new KeyboardHook();
+            keyHook.KeyboardHooked += new KeyboardHookedEventHandler(keyHookProc);
+
+            //タスクバーに表示しない
             this.ShowInTaskbar = false;
 
             pictureBox1.Image = new Bitmap(Directory.GetCurrentDirectory() + "\\" + "img\\chara.png");
@@ -42,6 +53,9 @@ namespace cocoassistant{
             this.FormBorderStyle = FormBorderStyle.None;
             this.TransparencyKey = Color.DarkGray;
 
+            //透過度の設定
+            this.Opacity = Properties.Settings.Default.Opacity;
+
             //常に最前面に表示
             this.TopMost = Properties.Settings.Default.MostTop;
             toolStripMenuItem1.Checked = Properties.Settings.Default.MostTop;
@@ -54,6 +68,17 @@ namespace cocoassistant{
             this.pictureBox1.Focus();
 
         }
+
+        private void keyHookProc(object sender, KeyboardHookedEventArgs e) {
+            if (e.AltDown && e.KeyCode == Keys.C) {
+
+                Microsoft.VisualBasic.Interaction.AppActivate(System.Diagnostics.Process.GetCurrentProcess().Id);
+                //SetForegroundWindow(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle);
+                //this.BringToFront();
+                this.richTextBox1.Focus();
+            }
+        }
+
         //Form1のMouseDownイベントハンドラ
         private void Form1_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e){
             if ((e.Button & MouseButtons.Left) == MouseButtons.Left){
@@ -83,7 +108,7 @@ namespace cocoassistant{
 
             else if (richTextBox1.Text == "ありがとう") richTextBox1.Text = "どういたしまして!";
 
-                //ファイルまたはフォルダを開く
+                //ファイルまたはフォルダを開く アプリ起動時は key:argumentでコマンドライン引数の指定が可能
             else if (Regex.IsMatch(richTextBox1.Text, @"^(.*)を(起動|開いて)")){
                 String str = richTextBox1.Text;
                 richTextBox1.Text = "まかせて!";
@@ -134,6 +159,7 @@ namespace cocoassistant{
                 timer.AutoReset = false;
                 timer.Start();
 
+                //特定の時間になったら通知 Actionに含めたい
             } else if (Regex.IsMatch(richTextBox1.Text, @"^(.*)(になったら教えて)")) {
                 String str = richTextBox1.Text;
                 DateTime dt, tdt;
@@ -182,6 +208,7 @@ namespace cocoassistant{
                 richTextBox1.Text = "わかった!";
                 timer.Stop();
 
+                //直前のタイマーをもう一回
             } else if (Regex.IsMatch(richTextBox1.Text, @"もう一回計って")) {
                 richTextBox1.Text = "わかった!";
                 timer = new System.Timers.Timer();
@@ -190,13 +217,34 @@ namespace cocoassistant{
                 timer.AutoReset = false;
                 timer.Start();
 
-                //アプリショートカットを追加
+                //アプリショートカットを追加 key:path(:argument)
             } else if (Regex.IsMatch(richTextBox1.Text, @"(.*?):(.*)を追加して")) {
                 richTextBox1.Text = Action.addApp(richTextBox1.Text);
 
+                //アプリショートカットを削除
             } else if (Regex.IsMatch(richTextBox1.Text, @"(.*?)を削除して")) {
                 richTextBox1.Text = Action.deleteApp(richTextBox1.Text);
+                //ショートカット一覧を表示
+            } else if (Regex.IsMatch(richTextBox1.Text, @"(.*)ショートカット一覧(.*)")) {
+                richTextBox1.Text = Action.getAppList();
 
+                //透過度を変更
+            } else if (Regex.IsMatch(richTextBox1.Text, @"透過度を([0-9]{1,3})に")) {
+                Match m = Regex.Match(richTextBox1.Text, @"透過度を(?<op>[0-9]{1,3})に");
+                int newop = int.Parse(m.Groups["op"].Value);
+                if (newop < 0 || newop > 100) {
+                    richTextBox1.Text = "透過度は0~100の範囲で指定してね";
+                } else {
+                    newop = 100 - newop;
+                    this.Opacity = (double)newop / 100;
+                    Properties.Settings.Default.Opacity = (double)newop / 100;
+                    Properties.Settings.Default.Save();
+                    richTextBox1.Text = "透過度を変更したよ！";
+                }
+            } else if (Regex.IsMatch(richTextBox1.Text, @"(.*)プロセス情報(.*)")) {
+                richTextBox1.Text = Action.processInfo();
+
+                
                 //その他 アプリ名をもとにソフト起動したりフォルダ・ファイル開いたりググったり
             } else {
                 String str = richTextBox1.Text;
@@ -259,6 +307,10 @@ namespace cocoassistant{
                 e.Handled = true;
                 submit();
             }
+        }
+
+        private void richTextBox1_Leave(object sender, EventArgs e) {
+            if (richTextBox1.Text == String.Empty) richTextBox1.Text = "ご注文は何ですか？";
         }
         
 
