@@ -26,6 +26,9 @@ namespace cocoassistant{
         private System.Timers.Timer timer;
         private int sInterval;
         private static KeyboardHook keyHook;
+        private System.Windows.Forms.Timer aTimer;
+        private int ad = -3;
+
        
         public Form1(){
             InitializeComponent();
@@ -40,7 +43,7 @@ namespace cocoassistant{
             //タスクバーに表示しない
             this.ShowInTaskbar = false;
 
-            pictureBox1.Image = new Bitmap(Directory.GetCurrentDirectory() + "\\" + "img\\chara.png");
+            pictureBox1.Image = new Bitmap(Directory.GetCurrentDirectory() + "\\" + "img\\chara.png"); ;
             pictureBox2.Image = new Bitmap(Directory.GetCurrentDirectory() + "\\" + "img\\hukidashi.png");
 
             //ドラッグで移動するためのハンドラをそれぞれの画像に登録する。
@@ -64,9 +67,20 @@ namespace cocoassistant{
             this.Left = Properties.Settings.Default.Left;
             this.Top = Properties.Settings.Default.Top;
 
+            aTimer = new System.Windows.Forms.Timer();
+            aTimer.Tick += new EventHandler(aTimer_Tick);
+            aTimer.Interval = 500;
+            aTimer.Start();
+
             richTextBox1.Text = "ご注文は何ですか？";
             this.pictureBox1.Focus();
 
+        }
+
+        private void aTimer_Tick(object sender, System.EventArgs e) {
+            this.pictureBox1.Top += ad;
+            ad = -ad;
+            aTimer.Start();
         }
 
         private void keyHookProc(object sender, KeyboardHookedEventArgs e) {
@@ -182,17 +196,17 @@ namespace cocoassistant{
                     n = int.Parse(Regex.Match(str, @"(?<n>[0-9]+)月").Groups["n"].Value);
                     if (m == -1) m = 0;
                     if (h == -1) h = 0;
-                    if (d == -1) d = 0;
+                    if (d == -1) d = 1;
                 }
                 if (Regex.IsMatch(str, @"([0-9]+)年")) {
                     y = int.Parse(Regex.Match(str, @"(?<y>[0-9]+)年").Groups["y"].Value);
                     if (m == -1) m = 0;
                     if (h == -1) h = 0;
-                    if (d == -1) d = 0;
-                    if (n == -1) n = 0;
+                    if (d == -1) d = 1;
+                    if (n == -1) n = 1;
                 }
                 tdt = DateTime.Now;
-                dt = new DateTime((y>=0) ? y : tdt.Year, (n>=0) ? n : tdt.Month, (d>=0) ? d : tdt.Day, (h>=0) ? h : tdt.Hour, (m>=0) ? m : tdt.Minute, 0);
+                dt = new DateTime((y>=0) ? y : tdt.Year, (n>=1) ? n : tdt.Month, (d>=1) ? d : tdt.Day, (h>=0) ? h : tdt.Hour, (m>=0) ? m : tdt.Minute, 0);
                 TimeSpan tp = dt - tdt;
                 Console.WriteLine((int)tp.TotalMilliseconds);
                 interval = (int)tp.TotalMilliseconds;
@@ -300,6 +314,7 @@ namespace cocoassistant{
                 this.TopMost = true;
                 this.TopMost = false;
             }
+            richTextBox1.Focus();
         }
 
         private void richTextBox1_KeyDown(object sender, KeyEventArgs e) {
@@ -308,11 +323,5 @@ namespace cocoassistant{
                 submit();
             }
         }
-
-        private void richTextBox1_Leave(object sender, EventArgs e) {
-            if (richTextBox1.Text == String.Empty) richTextBox1.Text = "ご注文は何ですか？";
-        }
-        
-
     }
 }

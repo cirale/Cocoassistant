@@ -47,9 +47,9 @@
             this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.pictureBox1.ContextMenuStrip = this.contextMenuStrip1;
             this.pictureBox1.Cursor = System.Windows.Forms.Cursors.Default;
-            this.pictureBox1.Location = new System.Drawing.Point(30, 144);
+            this.pictureBox1.Location = new System.Drawing.Point(33, 155);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(178, 255);
+            this.pictureBox1.Size = new System.Drawing.Size(178, 258);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
@@ -97,7 +97,6 @@
             this.richTextBox1.Text = "ご注文は何ですか？";
             this.richTextBox1.Enter += new System.EventHandler(this.richTextBox1_Enter);
             this.richTextBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.richTextBox1_KeyDown);
-            this.richTextBox1.Leave += new System.EventHandler(this.richTextBox1_Leave);
             // 
             // notifyIcon1
             // 
@@ -113,7 +112,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DarkGray;
-            this.ClientSize = new System.Drawing.Size(252, 400);
+            this.ClientSize = new System.Drawing.Size(252, 420);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.pictureBox1);
