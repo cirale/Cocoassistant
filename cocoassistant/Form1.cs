@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Timers;
@@ -17,18 +10,17 @@ using HongliangSoft.Utilities.Gui;
 namespace cocoassistant{
     public partial class Form1 : Form{
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
         private Point mousePoint;
         private String time;
         private String stime;
+        private System.Timers.Timer ttimer;
         private System.Timers.Timer timer;
         private int sInterval;
         private static KeyboardHook keyHook;
-        private System.Windows.Forms.Timer aTimer;
-        private int ad = -3;
+        private String[] lines;
 
+        private delegate void DelAnimetion();
+        private delegate void DeltextChange();
        
         public Form1(){
             InitializeComponent();
@@ -43,8 +35,8 @@ namespace cocoassistant{
             //タスクバーに表示しない
             this.ShowInTaskbar = false;
 
-            pictureBox1.Image = new Bitmap(Directory.GetCurrentDirectory() + "\\" + "img\\chara.png"); ;
-            pictureBox2.Image = new Bitmap(Directory.GetCurrentDirectory() + "\\" + "img\\hukidashi.png");
+            pictureBox1.Image = new Bitmap(Directory.GetCurrentDirectory() + @"\img\chara.png"); ;
+            pictureBox2.Image = new Bitmap(Directory.GetCurrentDirectory() + @"\img\hukidashi.png");
 
             //ドラッグで移動するためのハンドラをそれぞれの画像に登録する。
             pictureBox1.MouseDown += new MouseEventHandler(Form1_MouseDown);
@@ -67,20 +59,17 @@ namespace cocoassistant{
             this.Left = Properties.Settings.Default.Left;
             this.Top = Properties.Settings.Default.Top;
 
-            aTimer = new System.Windows.Forms.Timer();
-            aTimer.Tick += new EventHandler(aTimer_Tick);
-            aTimer.Interval = 500;
-            aTimer.Start();
+            ttimer = new System.Timers.Timer();
+            ttimer.Elapsed += new ElapsedEventHandler(ttimerend);
+            ttimer.Interval = 420000 + (new System.Random().Next(360000));
+            ttimer.AutoReset = true;
+            ttimer.Start();
+
+            lines = File.ReadAllLines(Directory.GetCurrentDirectory() + @"\settings\Lines.txt");
 
             richTextBox1.Text = "ご注文は何ですか？";
             this.pictureBox1.Focus();
 
-        }
-
-        private void aTimer_Tick(object sender, System.EventArgs e) {
-            this.pictureBox1.Top += ad;
-            ad = -ad;
-            aTimer.Start();
         }
 
         private void keyHookProc(object sender, KeyboardHookedEventArgs e) {
@@ -115,7 +104,7 @@ namespace cocoassistant{
         }
 
         private void submit(){
-
+            ttimer.Stop();
             richTextBox1.Text = richTextBox1.Text.Trim();
 
             if (richTextBox1.Text == "ばいばい") formClose();
@@ -266,20 +255,57 @@ namespace cocoassistant{
                 Action.launchAppByKeyOnly(str);
             }
             this.pictureBox1.Focus();
+            this.richTextBox1.Update();
+            this.Animetion();
+
+            ttimer.Start();
+        }
+
+        //動かす
+        private void Animetion() {
+            //タイマーは別スレッドで実行されているためInvokeを呼び出して実行する
+            if (this.pictureBox1.InvokeRequired) {
+                pictureBox1.Invoke(new DelAnimetion(Animetion));
+                return;
+            }
+            pictureBox1.Top -= 5;
+            System.Threading.Thread.Sleep(150);
+            pictureBox1.Top += 5;
+            System.Threading.Thread.Sleep(150);
+            pictureBox1.Top -= 5;
+            System.Threading.Thread.Sleep(150);
+            pictureBox1.Top += 5;
         }
 
         private void endTimer(object sender, ElapsedEventArgs e) {
             this.notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
             this.notifyIcon1.BalloonTipText = time + "経ったよ！";
             this.notifyIcon1.ShowBalloonTip(3000);
+            this.Animetion();
         }
 
         private void endTimer2(object sender, ElapsedEventArgs e) {
             this.notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
             this.notifyIcon1.BalloonTipText = stime + "になったよ！";
             this.notifyIcon1.ShowBalloonTip(3000);
+            this.Animetion();
         }
 
+        
+        private void ttimerend(object sender, ElapsedEventArgs e) {
+            if (this.richTextBox1.InvokeRequired) {
+                richTextBox1.Invoke(new DeltextChange(textChange));
+                return;
+            }
+          
+        }
+
+        private void textChange() {
+            this.richTextBox1.Text = lines[new System.Random().Next(lines.Length - 1)];
+            this.Animetion();
+            this.ttimer.Interval = 420000 + (new System.Random().Next(360000));
+        }
+        
         private void Form1_FormClosing(object sender, FormClosingEventArgs e){
             formClose();
         }
