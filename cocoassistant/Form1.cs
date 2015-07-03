@@ -259,6 +259,7 @@ namespace cocoassistant{
             this.Animetion();
 
             ttimer.Start();
+            this.ttimer.Interval = 420000 + (new System.Random().Next(360000));
         }
 
         //動かす
