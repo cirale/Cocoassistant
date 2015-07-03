@@ -254,7 +254,7 @@ namespace cocoassistant{
                 richTextBox1.Text = "まかせて!";
                 Action.launchAppByKeyOnly(str);
             }
-            this.pictureBox1.Focus();
+            //this.pictureBox1.Focus();
             this.richTextBox1.Update();
             this.Animetion();
 
@@ -348,6 +348,24 @@ namespace cocoassistant{
             if (((e.Modifiers & Keys.Control) == Keys.Control) && e.KeyCode == Keys.Enter) {
                 e.Handled = true;
                 submit();
+            } else if (((e.Modifiers & Keys.Alt) == Keys.Alt) && e.KeyCode == Keys.C) {
+                richTextBox1.Text = "";
+            }
+
+        }
+
+        private void pictureBox2_Click(object sender, EventArgs e) {
+            richTextBox1.Focus();
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e) {
+            pictureBox1.Focus();
+        }
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e) {
+            if (((e.Modifiers & Keys.Alt) == Keys.Alt) && e.KeyCode == Keys.C) {
+                richTextBox1.Text = "";
+                richTextBox1.Focus();
             }
         }
     }
