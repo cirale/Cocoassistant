@@ -4,7 +4,6 @@ using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Timers;
-using HongliangSoft.Utilities.Gui;
 
 
 namespace cocoassistant{
@@ -16,7 +15,6 @@ namespace cocoassistant{
         private System.Timers.Timer ttimer;
         private System.Timers.Timer timer;
         private int sInterval;
-        private static KeyboardHook keyHook;
         private String[] lines;
 
         private delegate void DelAnimetion();
@@ -28,9 +26,6 @@ namespace cocoassistant{
 
         private void Form1_Load(object sender, System.EventArgs e){
 
-            //キーボードをグローバルフックする
-            keyHook = new KeyboardHook();
-            keyHook.KeyboardHooked += new KeyboardHookedEventHandler(keyHookProc);
 
             //タスクバーに表示しない
             this.ShowInTaskbar = false;
@@ -70,16 +65,6 @@ namespace cocoassistant{
             richTextBox1.Text = "ご注文は何ですか？";
             this.pictureBox1.Focus();
 
-        }
-
-        private void keyHookProc(object sender, KeyboardHookedEventArgs e) {
-            if (e.AltDown && e.KeyCode == Keys.C) {
-
-                Microsoft.VisualBasic.Interaction.AppActivate(System.Diagnostics.Process.GetCurrentProcess().Id);
-                //SetForegroundWindow(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle);
-                //this.BringToFront();
-                this.richTextBox1.Focus();
-            }
         }
 
         //Form1のMouseDownイベントハンドラ
